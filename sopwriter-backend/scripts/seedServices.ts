@@ -1,0 +1,78 @@
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+import Service from '../src/models/Service.js';
+import GlobalSettings from '../src/models/GlobalSettings.js';
+
+dotenv.config();
+
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/phase1-dev';
+
+const SERVICES = [
+    // Documents
+    { code: 'SOP', category: 'documents', name: 'Statement of Purpose (SOP)', price: 2499, description: 'Personalized SOPs crafted to clearly present your academic background, goals, and motivation, aligned with the expectations of your target university and program.' },
+    { code: 'LOR', category: 'documents', name: 'Letter of Recommendation (LOR)', price: 1499, description: 'Professionally written LOR content highlighting your strengths, achievements, and suitability, structured to match international academic standards.' },
+    { code: 'MOTIVATION', category: 'documents', name: 'Motivation Letter', price: 1999, description: 'A focused and compelling motivation letter explaining your intent, interests, and future plans, tailored for universities, scholarships, or visa applications.' },
+    { code: 'RES_PROP', category: 'documents', name: 'Research Proposal', price: 3499, description: 'Detailed and academically sound research proposals outlining objectives, methodology, and expected outcomes, aligned with faculty and program requirements.' },
+    { code: 'UNI_ESSAY', category: 'documents', name: 'University Essays', price: 1299, description: 'Well-structured essays addressing specific university prompts, ensuring clarity, originality, and relevance to the institution’s values.' },
+    { code: 'THESIS', category: 'documents', name: 'Thesis Writing', price: 9999, description: 'Structured assistance for theses and academic projects, including problem formulation, literature review, methodology, and formal presentation.' },
+    { code: 'RES_PAPER', category: 'documents', name: 'Research Paper Support', price: 4999, description: 'Guidance and editorial support for drafting, refining, and structuring research papers according to academic and publication standards.' },
+
+    // Profile
+    { code: 'RESUME', category: 'profile', name: 'Resume Upgrade', price: 1499, description: 'Professionally optimized resumes tailored for academic admissions, research roles, or international job applications.' },
+    { code: 'PROFILE_CONSULT', category: 'profile', name: 'Profile Building Consultation', price: 999, description: 'One-on-one expert guidance to strengthen your academic and professional profile, including document strategy and application positioning.' },
+    { code: 'INTERVIEW', category: 'profile', name: 'Interview Preparation', price: 1999, description: 'Personalized interview preparation sessions focusing on clarity, confidence, and relevant questioning for university or academic interviews.' },
+
+    // Visa
+    { code: 'VISA_USA', category: 'visa', name: 'USA Visa Interview Prep', price: 2999, description: 'Structured mock interviews and guidance based on real visa interview scenarios, focusing on clarity, confidence, and compliance.' },
+    { code: 'VISA_AUS_GTE', category: 'visa', name: 'Australia GTE Preparation', price: 2999, description: 'Targeted assistance for Genuine Temporary Entrant (GTE) documentation and interview preparation in line with Australian immigration requirements.' },
+];
+
+const SETTINGS = [
+    { key: 'contact_phone', value: '+1234567890', type: 'string', description: 'Main support phone number' },
+    { key: 'contact_whatsapp', value: '1234567890', type: 'string', description: 'WhatsApp number (without +)' },
+    { key: 'contact_email', value: 'info@example.com', type: 'string', description: 'General inquiry email' },
+    { key: 'support_email', value: 'support@example.com', type: 'string', description: 'Support email for payments' },
+    { key: 'payment_upi_id', value: 'example@upi', type: 'string', description: 'UPI ID for payments' },
+    { key: 'payment_qr_image', value: '/qr.jpg', type: 'string', description: 'Path to QR code image (relative to public)' },
+];
+
+async function seed() {
+    console.log('Connecting to', MONGO_URI);
+    await mongoose.connect(MONGO_URI, {});
+    try {
+        // Seed Services
+        console.log('Seeding Services...');
+        // Clear existing services to ensure clean state with new schema
+        await Service.deleteMany({});
+        console.log('Cleared existing services.');
+
+        for (const s of SERVICES) {
+            const doc = new Service(s);
+            await doc.save();
+            console.log(`Seeded service ${s.code}`);
+        }
+
+        // Seed Settings
+        console.log('Seeding Settings...');
+        for (const s of SETTINGS) {
+            await GlobalSettings.findOneAndUpdate(
+                { key: s.key },
+                { $set: s },
+                { upsert: true, new: true }
+            );
+            console.log(`Seeded setting ${s.key}`);
+        }
+
+    } catch (err) {
+        console.error('Seed error', err);
+        process.exitCode = 1;
+    } finally {
+        await mongoose.disconnect();
+        console.log('Disconnected');
+    }
+}
+
+// Check if running directly (ESM compatible check)
+// In TS with ESM, require.main is not available.
+// We can just run seed() since this is intended as a script.
+seed();
