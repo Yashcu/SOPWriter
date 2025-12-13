@@ -1,0 +1,448 @@
+# 📝 SOP Writer
+
+> A powerful Standard Operating Procedure (SOP) generation platform with AI capabilities, email automation, and payment integration.
+
+[![Backend CI/CD](https://github.com/pulkitagg17/SOPWriter/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/pulkitagg17/SOPWriter/actions/workflows/backend-ci.yml)
+[![CodeQL](https://github.com/pulkitagg17/SOPWriter/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/pulkitagg17/SOPWriter/actions/workflows/codeql-analysis.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node Version](https://img.shields.io/badge/node-%3E%3D20.19.0-brightgreen)](https://nodejs.org)
+
+---
+
+## 🌟 Features
+
+### Core Features
+- ✨ **AI-Powered SOP Generation** - Automated creation of professional SOPs
+- 📧 **Email Automation** - Integrated email service with SendGrid & Nodemailer
+- 💳 **Payment Integration** - Secure payment processing and transaction management
+- 🔐 **JWT Authentication** - Secure user authentication and authorization
+- 📊 **Lead Management** - Track and manage customer leads
+- ⚙️ **Global Settings** - Centralized configuration management
+- 🎨 **Multi-Service Support** - Handle multiple service offerings
+
+### Technical Features
+- 🚀 **RESTful API** - Clean, well-documented REST endpoints
+- 🔒 **Security First** - Helmet.js, rate limiting, CORS protection
+- 📝 **TypeScript** - Full type safety and better developer experience
+- 🧪 **Comprehensive Testing** - Unit and integration tests with >70% coverage
+- 🐳 **Docker Ready** - Containerized deployment support
+- ⚡ **CI/CD Pipeline** - Automated testing and deployment with GitHub Actions
+- 📖 **API Documentation** - OpenAPI/Swagger documentation
+
+---
+
+## 🏗️ Project Structure
+
+```
+SOPWriter/
+├── .github/                    # GitHub Actions workflows
+│   ├── workflows/
+│   │   ├── backend-ci.yml     # Main CI/CD pipeline
+│   │   ├── codeql-analysis.yml # Security scanning
+│   │   ├── dependency-review.yml
+│   │   └── pr-automation.yml
+│   └── README.md
+├── sopwriter-backend/          # Backend API service
+│   ├── src/
+│   │   ├── config/            # Configuration files
+│   │   ├── controllers/        # Request handlers
+│   │   ├── middlewares/        # Custom middlewares
+│   │   ├── models/            # MongoDB models
+│   │   ├── routes/            # API routes
+│   │   ├── services/          # Business logic
+│   │   ├── tests/             # Test suites
+│   │   └── app.ts             # Express app setup
+│   ├── package.json
+│   └── tsconfig.json
+├── sopwriter-frontend/         # Frontend application
+└── README.md                   # This file
+```
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- **Node.js** >= 20.19.0 ([Download](https://nodejs.org))
+- **MongoDB** (local or Atlas)
+- **npm** or **yarn**
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/pulkitagg17/SOPWriter.git
+   cd SOPWriter
+   ```
+
+2. **Setup Backend**
+   ```bash
+   cd sopwriter-backend
+
+   # Install dependencies
+   npm install
+
+   # Copy environment variables
+   cp .env.example .env
+
+   # Edit .env with your configuration
+   # Add MongoDB URI, JWT secrets, SendGrid API key, etc.
+   ```
+
+3. **Configure Environment Variables**
+
+   Edit `sopwriter-backend/.env`:
+   ```env
+   # Server
+   PORT=5000
+   NODE_ENV=development
+
+   # Database
+   MONGODB_URI=mongodb://localhost:27017/sopwriter
+
+   # JWT
+   JWT_SECRET=your-super-secret-jwt-key
+   JWT_EXPIRES_IN=7d
+
+   # Email (SendGrid)
+   SENDGRID_API_KEY=your-sendgrid-api-key
+   FROM_EMAIL=noreply@yourapp.com
+
+   # Payment
+   PAYMENT_GATEWAY_KEY=your-payment-key
+
+   # CORS
+   CORS_ORIGIN=http://localhost:3000
+   ```
+
+4. **Start Development Server**
+   ```bash
+   npm run dev
+   ```
+
+   The API will be available at `http://localhost:5000`
+
+---
+
+## 📦 Available Scripts
+
+### Backend
+
+```bash
+# Development
+npm run dev              # Start dev server with hot reload
+
+# Building
+npm run build            # Compile TypeScript to JavaScript
+npm start                # Run production build
+
+# Code Quality
+npm run lint             # Run ESLint
+npm run lint:fix         # Fix ESLint issues
+npm run format           # Format code with Prettier
+npm run typecheck        # TypeScript type checking
+
+# Testing
+npm test                 # Run all tests
+npm run test:unit        # Run unit tests only
+npm run test:integration # Run integration tests only
+npm run test:coverage    # Generate coverage report
+npm run test:watch       # Run tests in watch mode
+npm run test:ci          # Run tests for CI/CD
+
+# Database
+npm run seed             # Seed database with sample data
+
+# Docker
+npm run docker:dev       # Start services with Docker Compose
+npm run docker:down      # Stop Docker services
+```
+
+---
+
+## 🧪 Testing
+
+### Running Tests Locally
+
+```bash
+cd sopwriter-backend
+
+# Run all tests
+npm test
+
+# Run with coverage
+npm run test:coverage
+
+# Run only unit tests
+npm run test:unit
+
+# Run only integration tests
+npm run test:integration
+```
+
+### Test Coverage
+
+Current test coverage: **>70%**
+
+Coverage reports are generated in `sopwriter-backend/coverage/`
+
+---
+
+## 🔧 API Documentation
+
+### Base URL
+```
+Development: http://localhost:5000
+Production: https://your-production-url.com
+```
+
+### Authentication Endpoints
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/api/auth/register` | Register new user | ❌ |
+| POST | `/api/auth/login` | User login | ❌ |
+| POST | `/api/auth/refresh` | Refresh token | ✅ |
+| POST | `/api/auth/logout` | User logout | ✅ |
+
+### Lead Management
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/api/public/leads` | Create new lead | ❌ |
+| GET | `/api/admin/leads` | Get all leads | ✅ Admin |
+| GET | `/api/admin/leads/:id` | Get lead by ID | ✅ Admin |
+
+### Settings & Configuration
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/api/public/config` | Get public config | ❌ |
+| PUT | `/api/admin/settings` | Update settings | ✅ Admin |
+
+### Transactions
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/api/transactions` | Create transaction | ✅ |
+| GET | `/api/transactions/:id` | Get transaction | ✅ |
+
+---
+
+## 🔐 Security Features
+
+- 🛡️ **Helmet.js** - Secure HTTP headers
+- 🚦 **Rate Limiting** - Prevent abuse and DDoS
+- 🔒 **CORS** - Cross-Origin Resource Sharing protection
+- 🔑 **JWT Authentication** - Secure token-based auth
+- ✅ **Input Validation** - Zod schema validation
+- 🔐 **Password Hashing** - bcrypt encryption
+- 🔍 **Security Scanning** - Automated CodeQL analysis
+
+---
+
+## 🚢 Deployment
+
+### Docker Deployment
+
+```bash
+# Build and run with Docker Compose
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+```
+
+### Manual Deployment
+
+1. **Build the application**
+   ```bash
+   cd sopwriter-backend
+   npm run build
+   ```
+
+2. **Set environment variables**
+   ```bash
+   export NODE_ENV=production
+   export MONGODB_URI=your-production-mongodb-uri
+   # ... other env vars
+   ```
+
+3. **Start the server**
+   ```bash
+   npm start
+   ```
+
+### Platform-Specific Deployments
+
+- **Render**: See [CI_CD_SETUP.md](.github/README.md)
+- **Heroku**: Uncomment Heroku deploy step in `.github/workflows/backend-ci.yml`
+- **AWS/Azure**: Use Docker deployment method
+
+---
+
+## 🤖 CI/CD Pipeline
+
+This project uses GitHub Actions for automated testing and deployment.
+
+### Workflows
+
+1. **Backend CI/CD** - Runs on every push
+   - Linting & type checking
+   - Unit & integration tests
+   - Build verification
+   - Security audit
+   - Auto-deployment (main branch)
+
+2. **CodeQL Security Analysis** - Weekly automated scans
+3. **Dependency Review** - On dependency update PRs
+4. **PR Automation** - Auto-labeling and size checks
+
+### Pipeline Triggers
+
+- ✅ Push to `main` or `develop` branches
+- ✅ Pull requests to `main` or `develop`
+- ✅ Weekly security scans (Mondays)
+
+See [.github/README.md](.github/README.md) for detailed CI/CD documentation.
+
+---
+
+## 📚 Documentation
+
+- [CI/CD Setup Guide](CI_CD_SETUP.md)
+- [Local Testing Guide](LOCAL_CI_TESTING.md)
+- [Security Audit Report](SECURITY_AUDIT_REPORT.md)
+- [White Label Guide](WHITE_LABEL_GUIDE.md)
+- [Security For Clients](SECURITY_FOR_CLIENTS.md)
+- [Hardcoded Values Audit](HARDCODED_VALUES_AUDIT.md)
+- [Project Completion Report](PROJECT_COMPLETE.md)
+
+---
+
+## 🛠️ Tech Stack
+
+### Backend
+- **Runtime**: Node.js (>=20.19.0)
+- **Framework**: Express.js v5
+- **Language**: TypeScript
+- **Database**: MongoDB with Mongoose
+- **Authentication**: JWT (jsonwebtoken)
+- **Email**: SendGrid & Nodemailer
+- **Validation**: Zod
+- **Testing**: Jest + Supertest
+- **Security**: Helmet, CORS, bcrypt, express-rate-limit
+
+### DevOps
+- **CI/CD**: GitHub Actions
+- **Containerization**: Docker
+- **Code Quality**: ESLint, Prettier
+- **Security Scanning**: CodeQL, npm audit
+
+---
+
+## 🔄 Development Workflow
+
+1. **Create a feature branch**
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+2. **Make your changes**
+   - Write code
+   - Add tests
+   - Update documentation
+
+3. **Run tests locally**
+   ```bash
+   npm run lint
+   npm run typecheck
+   npm test
+   npm run build
+   ```
+
+4. **Commit and push**
+   ```bash
+   git add .
+   git commit -m "feat: your feature description"
+   git push origin feature/your-feature-name
+   ```
+
+5. **Create Pull Request**
+   - CI/CD will run automatically
+   - Address any review comments
+   - Merge when approved
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! Please follow these guidelines:
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new features
+5. Ensure all tests pass
+6. Submit a pull request
+
+### Code Style
+
+- Follow existing code style
+- Use TypeScript strict mode
+- Write meaningful commit messages
+- Add JSDoc comments for functions
+- Maintain test coverage >70%
+
+---
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 👨‍💻 Author
+
+**Pulkit Aggarwal** ([@pulkitagg17](https://github.com/pulkitagg17))
+
+---
+
+## 🙏 Acknowledgments
+
+- Thanks to all contributors
+- Built with ❤️ using modern web technologies
+
+---
+
+## 📞 Support
+
+For support, email support@yourapp.com or open an issue on GitHub.
+
+---
+
+## 🗺️ Roadmap
+
+- [ ] Frontend application enhancement
+- [ ] Advanced SOP templates
+- [ ] Multi-language support
+- [ ] Export to PDF/Word
+- [ ] Real-time collaboration
+- [ ] Analytics dashboard
+- [ ] Mobile app
+
+---
+
+## 📊 Project Status
+
+✅ **Active Development** - Regularly maintained and updated
+
+Last Updated: December 2025
+
+---
+
+<p align="center">Made with ❤️ by the SOP Writer Team</p>
