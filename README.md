@@ -526,5 +526,5 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 <p align="center">
   <strong>Made with ❤️ by the SOP Writer Team</strong><br/>
-  <sub>Last Updated: December 2024</sub>
+  <sub>Last Updated: December 2025</sub>
 </p>
