@@ -36,8 +36,8 @@ export default function TrackApplicationModal({ isOpen, onClose }: TrackApplicat
             }
         } catch (err: unknown) {
             // @ts-expect-error - Accessing potential axios error
-            if (err?.response?.status === 404) {
-                setError("Application with this Reference ID does not exist.");
+            if (err?.response?.status === 404 || err?.response?.status === 400) {
+                setError("Track application does not exist check mail for track application");
             } else {
                 setError("Failed to track application. Please try again.");
             }

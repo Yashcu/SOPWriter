@@ -4,12 +4,16 @@ import { CreateTransactionDTO } from '../utils/zodSchemas.js';
 import { NotFoundError } from '../utils/errors.js';
 import mongoose from 'mongoose';
 import { HistoryAction, LeadStatus, TransactionStatus } from '../constants/index.js';
+import { MailService } from './mail.service.js';
+import { config_vars } from '../config/env.js';
 
 export async function declareTransaction(
   leadId: string,
   payload: CreateTransactionDTO,
   submittedByIp?: string
 ): Promise<ITransaction> {
+  const mail = MailService.getInstance();
+
   // ensure lead exists
   const lead = await Lead.findById(leadId).exec();
   if (!lead) throw new NotFoundError('Lead', leadId);
@@ -45,6 +49,17 @@ export async function declareTransaction(
   // Optionally update lead.status
   lead.status = LeadStatus.PAYMENT_DECLARED;
   await lead.save();
+
+  // notify admin (fire-and-forget)
+  mail
+    .sendAdminNotification({
+      transactionId: tx.transactionId,
+      leadId: lead._id.toString(),
+      leadName: lead.name,
+      leadEmail: lead.email,
+      appUrl: config_vars.app.baseUrl,
+    })
+    .catch(() => {});
 
   return tx;
 }
@@ -100,57 +115,10 @@ export async function verifyTransaction(
 ) {
   const supportsTransactions = await isTransactionSupported();
 
-  if (supportsTransactions) {
-    // Use MongoDB transactions for atomicity
-    const session = await mongoose.startSession();
-    session.startTransaction();
-
-    try {
-      const tx = await Transaction.findById(id).session(session).exec();
-      if (!tx) throw new NotFoundError('Transaction', id);
-
-      const update = getVerificationUpdate(action);
-      const adminIdentifier = admin.email || admin.id;
-      const timestamp = new Date();
-
-      // Update transaction
-      tx.status = update.txStatus;
-      tx.verifiedBy = adminIdentifier;
-      tx.verifiedAt = timestamp;
-      tx.verificationNote = note;
-      tx.history.push({
-        action: update.txAction,
-        by: adminIdentifier,
-        note,
-        at: timestamp,
-      });
-
-      await tx.save({ session });
-
-      // Update lead
-      const lead = await Lead.findById(tx.leadId).session(session).exec();
-      if (lead) {
-        lead.status = update.leadStatus;
-        lead.history.push({
-          action: update.leadAction,
-          by: adminIdentifier,
-          note,
-          at: timestamp,
-        });
-        await lead.save({ session });
-      }
-
-      await session.commitTransaction();
-      return { tx, lead };
-    } catch (error) {
-      await session.abortTransaction();
-      throw error;
-    } finally {
-      session.endSession();
-    }
-  } else {
-    // Fallback: No transaction support (e.g., standalone MongoDB in tests)
-    const tx = await Transaction.findById(id).exec();
+  const performVerification = async (session?: mongoose.ClientSession) => {
+    const tx = await Transaction.findById(id)
+      .session(session || null)
+      .exec();
     if (!tx) throw new NotFoundError('Transaction', id);
 
     const update = getVerificationUpdate(action);
@@ -169,10 +137,12 @@ export async function verifyTransaction(
       at: timestamp,
     });
 
-    await tx.save();
+    await tx.save({ session });
 
     // Update lead
-    const lead = await Lead.findById(tx.leadId).exec();
+    const lead = await Lead.findById(tx.leadId)
+      .session(session || null)
+      .exec();
     if (lead) {
       lead.status = update.leadStatus;
       lead.history.push({
@@ -181,9 +151,46 @@ export async function verifyTransaction(
         note,
         at: timestamp,
       });
-      await lead.save();
+      await lead.save({ session });
     }
 
     return { tx, lead };
+  };
+
+  if (supportsTransactions) {
+    // Use MongoDB transactions for atomicity
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      const result = await performVerification(session);
+      await session.commitTransaction();
+      sendMail(result);
+      return result;
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      session.endSession();
+    }
+  } else {
+    // Fallback: No transaction support (e.g., standalone MongoDB in tests)
+    const result = await performVerification();
+    sendMail(result);
+    return result;
+  }
+
+  function sendMail(result: { tx: any; lead: any }) {
+    if (result.lead) {
+      MailService.getInstance()
+        .sendUserVerification(result.lead.email, {
+          name: result.lead.name,
+          leadId: result.lead._id.toString(),
+          status: action === 'VERIFY' ? 'VERIFIED' : 'REJECTED',
+          note,
+          appUrl: config_vars.app.baseUrl,
+        })
+        .catch(() => {});
+    }
   }
 }

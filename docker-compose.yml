@@ -1,0 +1,33 @@
+services:
+  mongodb:
+    image: mongo:latest
+    restart: always
+    ports:
+      - "27017:27017" # Exposed for local tool access, can be internal only in strictly prod
+    volumes:
+      - mongo-data:/data/db
+
+  backend:
+    build: ./sopwriter-backend
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./sopwriter-backend/.env
+    environment:
+      - NODE_ENV=production
+      - MONGO_URI=mongodb://mongodb:27017/sopwriter
+      - APP_BASE_URL=http://localhost
+      # PORT is usually 5000 in .env, so we can omit or keep it as override
+
+    depends_on:
+      - mongodb
+
+  frontend:
+    build: ./sopwriter-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  mongo-data:

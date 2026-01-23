@@ -1,5 +1,6 @@
 import { Button } from "@/shared/components/ui/button";
 import { CheckCircle2 } from "lucide-react";
+import { PAYMENT_CONSTANTS } from "./paymentConstants";
 
 interface PaymentInstructionsPanelProps {
   upiUrl: string;
@@ -25,7 +26,7 @@ export default function PaymentInstructionsPanel({
           <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-transparent to-black/5 rounded-2xl pointer-events-none" />
           <img
             src={upiUrl}
-            alt="UPI QR Code"
+            alt={PAYMENT_CONSTANTS.QR_ALT_TEXT}
             className="w-full h-full object-contain"
           />
           {/* Logo in center (optional, mimics PhonePe style in screenshot) */}
@@ -36,13 +37,13 @@ export default function PaymentInstructionsPanel({
           </div>
         </div>
         <div className="text-center space-y-3">
-          <p className="text-sm font-medium text-muted-foreground">QR not working? You can pay directly to :</p>
+          <p className="text-sm font-medium text-muted-foreground">{PAYMENT_CONSTANTS.QR_NOT_WORKING_MSG}</p>
           <div
             className="inline-flex items-center gap-3 bg-secondary/50 hover:bg-secondary pl-4 pr-3 py-2.5 rounded-xl cursor-pointer transition-all border border-border/50 group"
-            onClick={() => copyToClipboard(upiId, 'UPI ID')}
+            onClick={() => copyToClipboard(upiId, PAYMENT_CONSTANTS.UPI_LABEL)}
           >
             <span className="font-mono text-base font-bold text-foreground tracking-tight">{upiId}</span>
-            <span className="text-[10px] uppercase tracking-wider font-bold bg-background/80 text-foreground/70 px-2 py-1 rounded-md shadow-sm group-hover:bg-background group-hover:text-primary transition-colors">Tap to copy</span>
+            <span className="text-[10px] uppercase tracking-wider font-bold bg-background/80 text-foreground/70 px-2 py-1 rounded-md shadow-sm group-hover:bg-background group-hover:text-primary transition-colors">{PAYMENT_CONSTANTS.COPY_TO_CLIPBOARD}</span>
           </div>
         </div>
       </div>
@@ -50,37 +51,36 @@ export default function PaymentInstructionsPanel({
       {/* Instructions Card */}
       <div className="bg-gradient-to-b from-muted/50 to-muted/20 border border-border/50 rounded-2xl p-6 space-y-5 shadow-inner">
         <h3 className="font-bold text-base text-foreground flex items-center gap-2">
-          How to Pay with UPI
+          {PAYMENT_CONSTANTS.INSTRUCTIONS_TITLE}
         </h3>
         <ol className="space-y-5 text-sm">
-          <li className="flex gap-3">
-            <span className="flex-none font-bold text-orange-500">1.</span>
-            <span className="text-muted-foreground"><strong className="text-foreground">Open any UPI app</strong> (PhonePe, Google Pay, Paytm, etc.)</span>
-          </li>
-          <li className="flex gap-3">
-            <span className="flex-none font-bold text-orange-500">2.</span>
-            <span className="text-muted-foreground">Scan the QR code above or use the UPI ID manually</span>
-          </li>
-          <li className="flex gap-3">
-            <span className="flex-none font-bold text-orange-500">3.</span>
-            <span className="text-muted-foreground">Verify the payment details and confirm</span>
-          </li>
-          <li className="flex gap-3">
-            <span className="flex-none font-bold text-orange-500">4.</span>
-            <div className="space-y-1 text-muted-foreground">
-              <span className="text-orange-500 font-bold tracking-wide mr-1">(MANDATORY)</span> Email the screenshot of the payment transaction and your Reference ID to:
-              <div
-                onClick={() => copyToClipboard(supportEmail, "Email")}
-                className="font-bold text-foreground hover:text-primary cursor-pointer transition-colors block mt-1"
-              >
-                {supportEmail}
-              </div>
-            </div>
-          </li>
-          <li className="flex gap-3">
-            <span className="flex-none font-bold text-orange-500">5.</span>
-            <span className="text-muted-foreground">Click <strong className="text-foreground">"I Have Paid"</strong> below and enter your Transaction ID.</span>
-          </li>
+          {PAYMENT_CONSTANTS.STEPS.map((stepItem, index) => (
+            <li className="flex gap-3" key={index}>
+              <span className="flex-none font-bold text-orange-500">{stepItem.step}.</span>
+              {stepItem.hasEmail ? (
+                <div className="space-y-1 text-muted-foreground">
+                  <span className="text-orange-500 font-bold tracking-wide mr-1">{stepItem.highlight}</span>
+                  {stepItem.text.replace(stepItem.highlight || '', '').trim()}
+                  <div
+                    onClick={() => copyToClipboard(supportEmail, "Email")}
+                    className="font-bold text-foreground hover:text-primary cursor-pointer transition-colors block mt-1"
+                  >
+                    {supportEmail}
+                  </div>
+                </div>
+              ) : (
+                <span className="text-muted-foreground">
+                  {stepItem.highlight ? (
+                    <>
+                      {stepItem.text.split(stepItem.highlight)[0]}
+                      <strong className="text-foreground">{stepItem.highlight}</strong>
+                      {stepItem.text.split(stepItem.highlight)[1]}
+                    </>
+                  ) : stepItem.text}
+                </span>
+              )}
+            </li>
+          ))}
         </ol>
       </div>
 
@@ -92,11 +92,11 @@ export default function PaymentInstructionsPanel({
           onClick={() => setIsModalOpen(true)}
         >
           <CheckCircle2 className="mr-2 h-5 w-5" />
-          I Have Paid
+          {PAYMENT_CONSTANTS.BUTTON_TEXT}
         </Button>
         <div className="text-center">
           <p className="text-xs text-muted-foreground">
-            Need help with payment? Contact us at <a href={`mailto:${supportEmail}`} className="underline hover:text-primary transition-colors">{supportEmail}</a>
+            {PAYMENT_CONSTANTS.SUPPORT_TEXT_PREFIX} <a href={`mailto:${supportEmail}`} className="underline hover:text-primary transition-colors">{supportEmail}</a>
           </p>
         </div>
       </div>

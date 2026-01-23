@@ -1,15 +1,13 @@
-import sgMail from '@sendgrid/mail';
 import nodemailer from 'nodemailer';
 import { config_vars } from '../config/env.js';
 import { RETRY } from '../constants/index.js';
 
-type Provider = 'sendgrid' | 'smtp' | 'memory';
+type Provider = 'smtp' | 'memory';
 
 interface MailServiceOptions {
   from: string;
   adminEmail: string;
   provider?: Provider;
-  sendgridApiKey?: string;
   smtpConfig?: nodemailer.TransportOptions;
   retryAttempts?: number;
 }
@@ -23,7 +21,6 @@ export class MailService {
   private from: string;
   public adminEmail: string;
   private provider: Provider;
-  private sgKey?: string;
   private transporter?: nodemailer.Transporter;
   private retryAttempts: number;
   public sentMails: any[] = []; // for testing
@@ -35,21 +32,10 @@ export class MailService {
     if (!opts.provider && config_vars.nodeEnv === 'test') {
       this.provider = 'memory';
     } else {
-      this.provider =
-        opts.provider || (config_vars.mail.provider === 'sendgrid' ? 'sendgrid' : 'smtp');
+      this.provider = 'smtp';
     }
 
-    this.sgKey = opts.sendgridApiKey || config_vars.mail.sendgridApiKey;
     this.retryAttempts = opts.retryAttempts ?? RETRY.MAX_ATTEMPTS;
-
-    if (this.provider === 'sendgrid') {
-      if (!this.sgKey) {
-        // Fallback to smtp if API key is missing
-        this.provider = 'smtp';
-      } else {
-        sgMail.setApiKey(this.sgKey);
-      }
-    }
 
     if (this.provider === 'smtp') {
       const smtpConfig =
@@ -103,12 +89,8 @@ export class MailService {
 
     while (attempt < this.retryAttempts) {
       try {
-        if (this.provider === 'sendgrid') {
-          await sgMail.send({ to, from: this.from, subject, text, html });
-        } else if (this.provider === 'smtp') {
-          if (!this.transporter) throw new Error('SMTP transporter not configured');
-          await this.transporter.sendMail({ to, from: this.from, subject, text, html });
-        }
+        if (!this.transporter) throw new Error('SMTP transporter not configured');
+        await this.transporter.sendMail({ to, from: this.from, subject, text, html });
         return { ok: true };
       } catch (err: any) {
         lastErr = err;
@@ -190,6 +172,7 @@ ${noteText}You can view details at ${vars.appUrl}/leads/${vars.leadId}
 Thanks.`;
     return this.send(to, subject, text);
   }
+
   async sendOtp(to: string, otp: string) {
     const subject = 'Password Reset OTP';
     const text = `Your OTP for password reset is: ${otp}\n\nThis OTP is valid for 5 minutes.\nIf you did not request this, please ignore this email.`;

@@ -34,6 +34,11 @@ export function errorHandler(err: any, req: Request, res: Response, _next: NextF
   // map certain known error types to status codes
   let status = 500;
   if (err.name === 'ValidationError' || err.code === ErrorCode.VALIDATION_ERROR) status = 400;
+  if (err.name === 'CastError') {
+    status = 400;
+    payload.message = 'Invalid ID format';
+    payload.code = ErrorCode.VALIDATION_ERROR;
+  }
   if (err.code === ErrorCode.AUTH_REQUIRED || err.code === ErrorCode.AUTH_INVALID) status = 401;
   if (err.code === ErrorCode.FORBIDDEN) status = 403;
   if (

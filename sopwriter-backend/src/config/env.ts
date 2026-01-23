@@ -15,10 +15,10 @@ const envSchema = z.object({
   MONGO_URI: z.string().url(),
   FROM_EMAIL: z.string().email(),
   ADMIN_NOTIFY_EMAIL: z.string().email(),
-  SMTP_HOST: z.string(),
-  SMTP_PORT: z.string(),
-  SMTP_USER: z.string(),
-  SMTP_PASS: z.string(),
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.string().optional(),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
   SMTP_SECURE: z.string().default('false'),
   JWT_SECRET: z.string().min(VALIDATION.MIN_JWT_SECRET_LENGTH),
   CORS_ORIGIN: z.string().default('http://localhost:5173'),
@@ -31,13 +31,11 @@ const envSchema = z.object({
   APP_BASE_URL: z.string().url(),
   DEFAULT_CONTACT_PHONE: z.string().optional(),
   DEFAULT_WHATSAPP: z.string().optional(),
-  DEFAULT_CONTACT_EMAIL: z.string().email().optional(),
-  DEFAULT_SUPPORT_EMAIL: z.string().email().optional(),
+  DEFAULT_CONTACT_EMAIL: z.union([z.string().email(), z.literal('')]).optional(),
+  DEFAULT_SUPPORT_EMAIL: z.union([z.string().email(), z.literal('')]).optional(),
   DEFAULT_UPI_ID: z.string().optional(),
   DEFAULT_QR_IMAGE: z.string().optional(),
   LOG_LEVEL: z.string().optional(),
-  MAIL_PROVIDER: z.enum(['sendgrid', 'smtp', 'memory']).optional(),
-  SENDGRID_API_KEY: z.string().optional(),
 });
 
 const parseEnv = () => {
@@ -75,10 +73,10 @@ export const config_vars = {
     from: env.FROM_EMAIL,
     adminNotify: env.ADMIN_NOTIFY_EMAIL,
     smtp: {
-      host: env.SMTP_HOST,
-      port: parseInt(env.SMTP_PORT, 10),
-      user: env.SMTP_USER,
-      pass: env.SMTP_PASS,
+      host: env.SMTP_HOST || 'localhost',
+      port: env.SMTP_PORT ? parseInt(env.SMTP_PORT, 10) : 587,
+      user: env.SMTP_USER || '',
+      pass: env.SMTP_PASS || '',
       secure: env.SMTP_SECURE === 'true',
     },
   },
@@ -110,7 +108,7 @@ export const config_vars = {
     qrImage: env.DEFAULT_QR_IMAGE || '/qr.jpg',
   },
   mail: {
-    provider: env.MAIL_PROVIDER || 'smtp',
-    sendgridApiKey: env.SENDGRID_API_KEY,
+    // Only smtp or memory supported now
+    provider: env.NODE_ENV === 'test' ? 'memory' : 'smtp',
   },
 };

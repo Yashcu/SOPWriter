@@ -1,35 +1,16 @@
 import type { Request, Response } from 'express';
 import * as leadService from '../services/lead.service.js';
-import type { IHistoryEntry } from '../models/Lead.js';
-import { MailService } from '../services/mail.service.js';
-import { config_vars } from '../config/env.js';
 import { NotFoundError } from '../utils/errors.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { successResponse } from '../utils/responses.js';
-import { HistoryAction } from '../constants/index.js';
-
-const mail = MailService.getInstance();
+import { TypedRequest } from '../types/request.js';
+import { CreateLeadDTO } from '../utils/zodSchemas.js';
 
 export const createLeadHandler = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const payload = (req as any).validatedBody;
-    const lead = await leadService.createLead(payload);
+    const typedReq = req as TypedRequest<CreateLeadDTO>;
+    const { lead, isDuplicate } = await leadService.createLead(typedReq.validatedBody);
 
-    // send confirmation email (fire-and-forget)
-    mail
-      .sendLeadConfirmation(lead.email, {
-        name: lead.name,
-        leadId: lead._id.toString(),
-        service: lead.service,
-        adminEmail: mail.adminEmail,
-        appUrl: config_vars.app.baseUrl,
-      })
-      .catch(() => {}); // Email failure is non-critical
-
-    // If this was a dedupe (history last item might be DUPLICATE_ATTEMPT), return 200 and note it
-    const isDuplicate =
-      lead.history &&
-      lead.history.some((h: IHistoryEntry) => h.action === HistoryAction.DUPLICATE_ATTEMPT);
     const statusCode = isDuplicate ? 200 : 201;
     res.status(statusCode).json(successResponse({ leadId: lead._id }));
   }

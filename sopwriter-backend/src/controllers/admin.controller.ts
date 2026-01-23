@@ -2,10 +2,10 @@ import type { Request, Response } from 'express';
 import Transaction from '../models/Transaction.js';
 import Lead from '../models/Lead.js';
 import * as transactionService from '../services/transaction.service.js';
-import { MailService } from '../services/mail.service.js';
 import { config_vars } from '../config/env.js';
 import { NotFoundError } from '../utils/errors.js';
 import { escapeRegex } from '../utils/sanitize.js';
+import { AuthenticatedRequest } from '../types/request.js';
 import { parsePagination, buildPaginationMeta } from '../utils/pagination.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { successResponse, errorResponse } from '../utils/responses.js';
@@ -13,7 +13,6 @@ import { ErrorCode, PAGINATION, TIMEOUT } from '../constants/index.js';
 import { AuthService } from '../services/auth.service.js';
 import { logger } from '../config/logger.js';
 
-const mail = MailService.getInstance();
 const authService = AuthService.getInstance();
 
 export const loginHandler = asyncHandler(async (req: Request, res: Response) => {
@@ -166,25 +165,15 @@ export const verifyTransactionHandler = asyncHandler(async (req: Request, res: R
     return;
   }
 
-  const admin = (req as any).admin || { id: 'unknown' };
-  const result = await transactionService.verifyTransaction(
+  const admin = (req as AuthenticatedRequest).admin || { id: 'unknown', email: 'unknown' };
+
+  // Email notification is now handled inside the service
+  await transactionService.verifyTransaction(
     id,
     { id: admin.sub || admin.id, email: admin.email },
     action as 'VERIFY' | 'REJECT',
     note
   );
-
-  if (result.lead) {
-    mail
-      .sendUserVerification(result.lead.email, {
-        name: result.lead.name,
-        leadId: result.lead._id.toString(),
-        status: action === 'VERIFY' ? 'VERIFIED' : 'REJECTED',
-        note,
-        appUrl: config_vars.app.baseUrl,
-      })
-      .catch(() => {});
-  }
 
   res.json(
     successResponse({

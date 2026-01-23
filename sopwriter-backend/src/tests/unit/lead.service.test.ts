@@ -23,11 +23,11 @@ afterEach(async () => {
 describe('lead.service', () => {
   it('creates a lead and dedupes within window', async () => {
     const payload = { name: 'Dup', email: 'dup@example.com', service: 'VISA_TOURIST' };
-    const a = await leadService.createLead(payload as any);
+    const { lead: a } = await leadService.createLead(payload as any);
     expect(a._id).toBeDefined();
 
     // second call — should return same lead
-    const b = await leadService.createLead(payload as any);
+    const { lead: b } = await leadService.createLead(payload as any);
     expect(b._id.toString()).toBe(a._id.toString());
 
     const fresh = await Lead.findOne({ email: 'dup@example.com' }).exec();
