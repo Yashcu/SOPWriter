@@ -4,6 +4,7 @@ import HeroSection from "@/features/home/components/HeroSection";
 import HowItWorksSection from "@/features/home/components/HowItWorksSection";
 import FinalCTASection from "@/features/home/components/FinalCTASection";
 import TrustStrip from "@/features/home/components/TrustStrip";
+import RenderWarningBanner from "@/shared/components/RenderWarningBanner";
 
 export default function Home() {
     // Animation Variants
@@ -37,25 +38,26 @@ export default function Home() {
 
     return (
         <div className="relative overflow-hidden">
-            <HeroSection 
-                fadeUp={fadeUp} 
-                staggerContainer={staggerContainer} 
-                slideInRight={slideInRight} 
+            <RenderWarningBanner />
+            <HeroSection
+                fadeUp={fadeUp}
+                staggerContainer={staggerContainer}
+                slideInRight={slideInRight}
             />
-            
+
             {/* Visual Separator */}
             <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
-            <HowItWorksSection 
-                fadeUp={fadeUp} 
-                staggerContainer={staggerContainer} 
+            <HowItWorksSection
+                fadeUp={fadeUp}
+                staggerContainer={staggerContainer}
             />
 
             {/* Visual Separator */}
             <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
             <FinalCTASection fadeUp={fadeUp} />
-            
+
             <TrustStrip />
         </div>
     );
