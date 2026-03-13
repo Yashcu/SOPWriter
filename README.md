@@ -1,530 +1,203 @@
+<h1 align="center">SOP Writer</h1>
+
+<p align="center">
+  <strong>A modern, full-stack platform for professional Statement of Purpose (SOP) writing services.</strong>
+</p>
+
 <p align="center">
   <img src="sopwriter-frontend/public/Hero.png" alt="SOP Writer" width="600"/>
 </p>
 
-<h1 align="center">📝 SOP Writer</h1>
+## Overview
 
-<p align="center">
-  <strong>Professional Statement of Purpose Writing Service Platform</strong>
-</p>
+SOP Writer is a production-ready web application designed to manage the entire lifecycle of professional writing services. Built to handle customer inquiries, process secure UPI payments, and provide administrators with a comprehensive dashboard, the platform streamlines lead tracking and order fulfillment. It prioritizes performance, security, and developer experience through modern tooling and a robust architectural design.
 
-<p align="center">
-  A modern, full-stack web application for managing SOP writing services with lead management, payment processing, and comprehensive admin dashboard.
-</p>
+## Tech Stack
 
-<p align="center">
-  <a href="https://github.com/pulkitagg17/SOPWriter/blob/main/LICENSE">
-    <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"/>
-  </a>
-  <a href="https://nodejs.org">
-    <img src="https://img.shields.io/badge/node-%3E%3D20.19.0-brightgreen.svg" alt="Node Version"/>
-  </a>
-  <a href="#">
-    <img src="https://img.shields.io/badge/TypeScript-5.9-blue.svg" alt="TypeScript"/>
-  </a>
-  <a href="#">
-    <img src="https://img.shields.io/badge/React-19.2-61dafb.svg" alt="React"/>
-  </a>
-  <a href="#">
-    <img src="https://img.shields.io/badge/MongoDB-Mongoose_9-green.svg" alt="MongoDB"/>
-  </a>
-  <a href="#">
-    <img src="https://img.shields.io/badge/Test_Coverage-71%25-success.svg" alt="Test Coverage"/>
-  </a>
-</p>
+**Frontend**
+- **Framework:** React 19.2, Vite
+- **Styling & UI:** Tailwind CSS 4, Radix UI, Framer Motion
+- **Language:** TypeScript 5.9
+- **Routing & State:** React Router 7.x
 
-<p align="center">
-  <a href="#-features">Features</a> •
-  <a href="#-tech-stack">Tech Stack</a> •
-  <a href="#-quick-start">Quick Start</a> •
-  <a href="#-api-documentation">API Docs</a> •
-  <a href="#-testing">Testing</a>
-</p>
+**Backend**
+- **Runtime & Framework:** Node.js (≥20.19.0), Express.js 5.x
+- **Language:** TypeScript 5.9
+- **Validation & Auth:** Zod schema validation, JWT Authentication, bcrypt
+- **Security:** Helmet.js, configured CORS, Rate Limiting
 
----
+**Database & Tools**
+- **Database:** MongoDB with Mongoose 9.x
+- **Testing:** Jest (Backend), Vitest (Frontend)
+- **Logging:** Pino
 
-## ✨ Features
+**Deployment & DevOps**
+- **Containerization:** Docker & Docker Compose
+- **Tooling:** ESLint, Prettier
 
-### 🎯 Core Features
+## Key Features
 
-| Feature | Description |
-|---------|-------------|
-| **📋 Lead Management** | Capture and track customer inquiries with multi-step wizard |
-| **💳 Payment Integration** | UPI-based payment system with QR code generation |
-| **🔐 Admin Dashboard** | Comprehensive dashboard for lead and transaction management |
-| **📧 Email Automation** | Automated notifications via SendGrid or SMTP |
-| **📊 Transaction Tracking** | Full payment lifecycle management with verification |
-| **⚙️ Dynamic Configuration** | Centralized settings for services, pricing, and contact info |
+- **Lead Management System:** Capture and track customer inquiries through a smooth frontend multi-step wizard.
+- **Secure Payment Integration:** Seamless UPI-based payment processing with automated QR code generation and transaction verification.
+- **Admin Dashboard:** Protected portal for comprehensive lead management, analytics, and transaction tracking.
+- **Automated Communication:** Event-driven email automation (SendGrid/SMTP) for customer notifications and admin alerts.
+- **Robust Security:** Built-in defenses against DDoS and abuse with IP rate limiting, secure HTTP headers, runtime validation, and stateless authentication.
+- **Dynamic Configuration:** Real-time, centralized settings for services, pricing, and system variables updateable without redeployments.
 
-### 🛡️ Security Features
+## Architecture
 
-- 🔒 **JWT Authentication** with secure token refresh
-- 🛡️ **Rate Limiting** to prevent abuse and DDoS attacks
-- 🔐 **Password Hashing** with bcrypt
-- ✅ **Input Validation** using Zod schemas
-- 🪖 **Helmet.js** for secure HTTP headers
-- 🌐 **CORS Protection** with configurable origins
+The system follows a fundamentally decoupled client-server architecture:
 
-### 🎨 Frontend Features
+```mermaid
+flowchart TB
+    Client([💻 Web Client<br/>React 19 / Vite])
 
-- ⚡ **Vite + React 19** for blazing fast development
-- 🎭 **Framer Motion** animations for premium UX
-- 📱 **Fully Responsive** mobile-first design
-- 🌙 **Dark Mode** support with next-themes
-- 🎨 **Tailwind CSS 4** for modern styling
-- 🧩 **Radix UI** accessible component primitives
+    subgraph Frontend["🎨 Frontend App (SPA)"]
+        direction TB
+        F_Router["React Router<br/>(Navigation)"]
+        F_State["State & Context<br/>(Local Management)"]
+        F_Features["Feature Modules<br/>(Leads, Admin, Payment)"]
+        F_API["Axios Client<br/>(REST Integration)"]
+        
+        F_Router --> F_Features
+        F_Features --> F_State
+        F_Features --> F_API
+    end
 
----
+    subgraph Backend["⚙️ Backend System (Express API)"]
+        direction TB
+        B_Router["API Routes<br/>(Public & Admin)"]
+        B_Middleware["Security & Auth<br/>(Helmet, Rate Limit, JWT)"]
+        B_Validator["Schema Validation<br/>(Zod)"]
+        B_Controller["Controllers<br/>(Request Handlers)"]
+        B_Service["Domain Services<br/>(Core Business Logic)"]
+        
+        B_Router --> B_Middleware
+        B_Middleware --> B_Validator
+        B_Validator --> B_Controller
+        B_Controller --> B_Service
+    end
 
-## 🏗️ Architecture
+    subgraph Database["🗄️ Data Layer"]
+        DB_Mongo[("MongoDB Cluster<br/>(Mongoose Models)")]
+        DB_Cache[("In-Memory Cache<br/>(Node Cache)")]
+    end
 
+    subgraph External["🌐 External Integrations"]
+        Ext_Email("Email Connectors<br/>(SendGrid/SMTP)")
+        Ext_UPI("UPI Payment Gateway")
+    end
+
+    Client === Frontend
+    F_API == "REST APIs (JSON)" === B_Router
+    B_Service o--o DB_Mongo
+    B_Service o--o DB_Cache
+    B_Service -.-> Ext_Email
+    Client -.-> Ext_UPI
 ```
+
+- **Client App (SPA):** A React-based Single Page Application focused on fast UX, accessible UI primitives, and animated transitions. Communicates securely with the API over REST.
+- **RESTful API:** An Express server acting as the central nervous system. It handles business logic, securely connects to the MongoDB cluster, and integrates with external services (e.g., mail providers).
+- **Data Layer:** MongoDB provides a flexible schema for leads, transactions, and global platform settings, managed via Mongoose models with strict schema definitions.
+
+## How It Works
+
+The development approach emphasizes type safety, runtime validation, and highly cohesive modularity: 
+- **Type Safety Pipeline:** TypeScript is used pervasively across both frontend and backend to ensure compile-time safety. Contracts between the client and server are heavily reinforced using Zod schemas to validate runtime data at the network boundary.
+- **Separation of Concerns:** The backend isolates concerns into routers, controllers, and services. This decouples business logic from HTTP transport layers, making unit and integration testing highly effective (current backend coverage >70%).
+- **State & Routing:** The frontend utilizes modular context providers and React Router for efficient client-side declarative routing. State management is kept close to where it's needed rather than relying on bloated global stores.
+
+## Project Structure
+
+```text
 SOPWriter/
-├── 📁 sopwriter-backend/           # Express.js API Server
-│   ├── 📁 src/
-│   │   ├── 📁 config/             # Configuration (DB, Env, Logger)
-│   │   ├── 📁 constants/          # Application constants
-│   │   ├── 📁 controllers/        # Request handlers
-│   │   ├── 📁 middlewares/        # Auth, Rate Limiting, Error Handling
-│   │   ├── 📁 models/             # MongoDB/Mongoose models
-│   │   ├── 📁 routes/             # API routes (admin, public)
-│   │   ├── 📁 services/           # Business logic layer
-│   │   ├── 📁 tests/              # Unit & Integration tests
-│   │   ├── 📁 types/              # TypeScript type definitions
-│   │   └── 📁 utils/              # Helper utilities
-│   ├── 📄 jest.config.cjs         # Jest configuration
-│   ├── 📄 tsconfig.json           # TypeScript configuration
-│   └── 📄 package.json
+├── sopwriter-backend/          # Express.js REST API
+│   ├── src/
+│   │   ├── config/             # System configuration (Env, DB, Logger)
+│   │   ├── controllers/        # Request handlers
+│   │   ├── middlewares/        # Auth, Rate Limiting, Error validation
+│   │   ├── models/             # Mongoose schemas
+│   │   ├── routes/             # API routing
+│   │   ├── services/           # Core business logic
+│   │   └── tests/              # Extensive Unit & Integration testing
+│   └── docker-compose.yml      # Local development container config
 │
-├── 📁 sopwriter-frontend/          # React + Vite Frontend
-│   ├── 📁 src/
-│   │   ├── 📁 app/                # App shell, routing, providers
-│   │   ├── 📁 components/         # Legacy shared components
-│   │   ├── 📁 contexts/           # React contexts
-│   │   ├── 📁 core/               # Core utilities (API, auth, config)
-│   │   ├── 📁 features/           # Feature modules
-│   │   │   ├── 📁 admin/          # Admin dashboard, auth, settings
-│   │   │   ├── 📁 home/           # Landing page components
-│   │   │   ├── 📁 leads/          # Lead creation wizard
-│   │   │   └── 📁 payment/        # Payment flow & verification
-│   │   ├── 📁 shared/             # Shared components, hooks, utils
-│   │   ├── 📁 styles/             # Global styles
-│   │   └── 📁 types/              # TypeScript types
-│   ├── 📄 vite.config.ts          # Vite configuration
-│   └── 📄 package.json
-│
-└── 📄 README.md
+└── sopwriter-frontend/         # Vite + React Application
+    ├── src/
+    │   ├── app/                # Shell, routing, and global providers
+    │   ├── components/         # Reusable UI components
+    │   ├── core/               # App configuration and API client
+    │   ├── features/           # Domain-driven modules (Admin, Leads, Payment)
+    │   └── shared/             # Shared hooks and utilities
+    └── package.json            # Frontend dependency management
 ```
 
----
+## Installation
 
-## 🛠️ Tech Stack
+Ensure you have **Node.js (≥ 20.19.0)** and **MongoDB** installed on your system.
 
-### Backend
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/pulkitagg17/SOPWriter.git
+   cd SOPWriter
+   ```
 
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| **Node.js** | ≥20.19.0 | Runtime environment |
-| **Express.js** | 5.x | Web framework |
-| **TypeScript** | 5.9 | Type safety |
-| **MongoDB** | - | Database |
-| **Mongoose** | 9.x | ODM |
-| **Jest** | 30.x | Testing framework |
-| **Zod** | 4.x | Schema validation |
-| **Pino** | 10.x | Logging |
+2. **Backend Setup:**
+   ```bash
+   cd sopwriter-backend
+   npm install
+   cp .env.example .env     # Configure your variables (see below)
+   npm run dev              # Starts the API server on http://localhost:5000
+   ```
 
-### Frontend
+3. **Frontend Setup:**
+   ```bash
+   cd ../sopwriter-frontend
+   npm install
+   npm run dev              # Starts the development server on http://localhost:5173
+   ```
 
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| **React** | 19.2 | UI library |
-| **Vite** | 7.x | Build tool |
-| **TypeScript** | 5.9 | Type safety |
-| **Tailwind CSS** | 4.x | Styling |
-| **Framer Motion** | 12.x | Animations |
-| **Radix UI** | Latest | Accessible primitives |
-| **React Router** | 7.x | Routing |
-| **Axios** | 1.x | HTTP client |
-| **Vitest** | 4.x | Testing |
+*(Alternatively, run `npm run docker:dev` inside the backend directory to provision the backend and datastore using Docker Compose.)*
 
----
+## Usage
 
-## 🚀 Quick Start
+- **Client Application:** Navigate to `http://localhost:5173`. Click "Get Started" to initiate the service selection wizard, provide contact details, and seamlessly proceed to the UPI payment gateway.
+- **Admin Dashboard:** Go to `http://localhost:5173/admin/login` (or the equivalent configured route). Log in using the provisioned admin credentials to manage incoming leads, authorize transactions, and configure platform settings.
+- **Testing:** Inside the `sopwriter-backend` directory, run `npm test` to execute the full suite of Jest unit and integration tests. Run `npm run test:coverage` for generating a structural coverage report.
 
-### Prerequisites
+## Environment Variables
 
-- **Node.js** ≥ 20.19.0
-- **MongoDB** (local or Atlas)
-- **npm** or **yarn**
-
-### 1️⃣ Clone the Repository
-
-```bash
-git clone https://github.com/pulkitagg17/SOPWriter.git
-cd SOPWriter
-```
-
-### 2️⃣ Backend Setup
-
-```bash
-cd sopwriter-backend
-
-# Install dependencies
-npm install
-
-# Create environment file
-cp .env.example .env
-
-# Edit .env with your configuration (see Environment Variables section)
-
-# Start development server
-npm run dev
-```
-
-**Backend runs at:** `http://localhost:5000`
-
-### 3️⃣ Frontend Setup
-
-```bash
-cd sopwriter-frontend
-
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
-```
-
-**Frontend runs at:** `http://localhost:5173`
-
----
-
-## ⚙️ Environment Variables
-
-### Backend (`sopwriter-backend/.env`)
+Configure the `.env` file in your `sopwriter-backend` directory:
 
 ```env
-# Server Configuration
 PORT=5000
 NODE_ENV=development
-
-# Database
 MONGO_URI=mongodb://localhost:27017/sopwriter
 
-# Authentication
-JWT_SECRET=your-strong-jwt-secret-key-at-least-32-characters-long
-
-# CORS & URLs
+# Authentication & Security
+JWT_SECRET=your_secure_jwt_secret_should_be_long
 CORS_ORIGIN=http://localhost:5173
-APP_BASE_URL=http://localhost:5173
 
-# Email Configuration (SMTP)
+# Email Deliverability
 MAIL_PROVIDER=smtp
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
-SMTP_SECURE=false
-SMTP_USER=your-email@gmail.com
-SMTP_PASS=your-app-password
-FROM_EMAIL=noreply@sopwriter.com
-ADMIN_NOTIFY_EMAIL=admin@sopwriter.com
+SMTP_USER=admin@example.com
+SMTP_PASS=your_app_password
 
-# Email Configuration (SendGrid - Alternative)
-SENDGRID_API_KEY=your-sendgrid-api-key
-
-# Rate Limiting
-RATE_LIMIT_WINDOW_MS=900000
-RATE_LIMIT_MAX=100
-RATE_LIMIT_MAX_LEADS=10
-RATE_LIMIT_MAX_TRANSACTIONS=20
-
-# Admin Setup
+# Root Admin Bootstrap
 ADMIN_EMAIL=admin@sopwriter.com
-ADMIN_PASSWORD=Admin@SecureP@ssw0rd!ChangeMe
-
-# Logging
-LOG_LEVEL=info
-
-# Default Settings
-DEFAULT_CONTACT_PHONE=+91-XXXXXXXXXX
-DEFAULT_WHATSAPP=+91XXXXXXXXXX
-DEFAULT_CONTACT_EMAIL=contact@sopwriter.com
-DEFAULT_SUPPORT_EMAIL=support@sopwriter.com
-DEFAULT_UPI_ID=your-upi@bank
-DEFAULT_QR_IMAGE=https://your-qr-code-url.png
+ADMIN_PASSWORD=your_secure_password
 ```
 
----
+## Future Improvements
 
-## 📦 Available Scripts
+- Generate structured PDFs continuously for automated draft document delivery.
+- Adopt real-time WebSocket communication for instant administrative alerts.
+- Abstract the core module to compile a standalone React Native application.
+- Expand data analytics visualization panels inside the admin dashboard.
 
-### Backend
+## Author / Credits
 
-```bash
-npm run dev              # Start dev server with hot reload
-npm run build            # Compile TypeScript
-npm start                # Run production build
-npm run lint             # Run ESLint
-npm run lint:fix         # Fix ESLint issues
-npm run format           # Format with Prettier
-npm run typecheck        # TypeScript type checking
-npm test                 # Run all tests
-npm run test:unit        # Run unit tests only
-npm run test:integration # Run integration tests only
-npm run test:coverage    # Generate coverage report
-npm run docker:dev       # Start with Docker Compose
-```
-
-### Frontend
-
-```bash
-npm run dev              # Start Vite dev server
-npm run build            # TypeScript check + Vite build
-npm run lint             # Run ESLint
-npm run preview          # Preview production build
-```
-
----
-
-## 🧪 Testing
-
-### Backend Test Suite
-
-The backend includes comprehensive unit and integration tests:
-
-```bash
-cd sopwriter-backend
-
-# Run all tests
-npm test
-
-# Run with coverage
-npm run test:coverage
-
-# Run specific test suites
-npm run test:unit        # 48 unit tests
-npm run test:integration # 60 integration tests
-```
-
-**Current Coverage:**
-
-| Metric | Coverage |
-|--------|----------|
-| Statements | 71.04% |
-| Branches | 61.35% |
-| Functions | 72.54% |
-| Lines | 72.25% |
-
-### Test Files Overview
-
-```
-tests/
-├── unit/
-│   ├── lead.service.test.ts
-│   ├── lead.model.test.ts
-│   ├── transaction.model.test.ts
-│   ├── transaction.service.test.ts
-│   ├── service.model.test.ts
-│   ├── globalsettings.model.test.ts
-│   ├── mail.service.test.ts
-│   └── errorHandler.test.ts
-│
-└── integration/
-    ├── admin.auth.test.ts
-    ├── admin.verify.test.ts
-    ├── admin.transactions.test.ts
-    ├── leads.flow.test.ts
-    ├── leads.errors.test.ts
-    ├── transactions.flow.test.ts
-    ├── settings.flow.test.ts
-    ├── config.flow.test.ts
-    ├── full.flow.test.ts
-    └── rateLimit.test.ts
-```
-
----
-
-## 📚 API Documentation
-
-### Base URL
-
-```
-Development: http://localhost:5000/api
-Production:  https://your-domain.com/api
-```
-
-### Public Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/public/config` | Get services & settings |
-| `POST` | `/public/leads` | Create new lead |
-| `GET` | `/public/leads/:id` | Get lead by ID |
-| `POST` | `/public/transactions` | Declare payment |
-
-### Admin Endpoints (🔐 Protected)
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/admin/auth/login` | Admin login |
-| `POST` | `/admin/auth/logout` | Admin logout |
-| `POST` | `/admin/auth/refresh` | Refresh token |
-| `POST` | `/admin/auth/forgot-password` | Request password reset |
-| `POST` | `/admin/auth/reset-password` | Reset password |
-| `GET` | `/admin/leads` | Get all leads (paginated) |
-| `GET` | `/admin/leads/:id` | Get lead details |
-| `PATCH` | `/admin/leads/:id/status` | Update lead status |
-| `GET` | `/admin/transactions` | Get all transactions |
-| `PATCH` | `/admin/transactions/:id/verify` | Verify transaction |
-| `GET` | `/admin/settings` | Get admin settings |
-| `PUT` | `/admin/settings` | Update settings |
-
-### Response Format
-
-```json
-{
-  "success": true,
-  "data": { ... },
-  "message": "Operation successful"
-}
-```
-
-### Error Response
-
-```json
-{
-  "success": false,
-  "error": {
-    "code": "ERROR_CODE",
-    "message": "Human readable message"
-  }
-}
-```
-
----
-
-## 🐳 Docker Deployment
-
-### Development with Docker Compose
-
-```bash
-cd sopwriter-backend
-
-# Start services (MongoDB + App)
-npm run docker:dev
-
-# Stop services
-npm run docker:down
-```
-
-### Production Docker Build
-
-```dockerfile
-# Build the image
-docker build -t sopwriter-backend .
-
-# Run the container
-docker run -p 5000:5000 --env-file .env sopwriter-backend
-```
-
----
-
-## 🔄 User Flows
-
-### Lead Creation Flow
-
-```
-1. User visits landing page
-2. Clicks "Get Started" → Wizard opens
-3. Step 1: Select service category
-4. Step 2: Choose specific service
-5. Step 3: Fill personal details
-6. Submit → Lead created → Redirect to payment
-```
-
-### Payment Flow
-
-```
-1. User views payment page with order details
-2. Scans UPI QR code / copies UPI ID
-3. Makes payment via preferred UPI app
-4. Enters transaction reference number
-5. Declares payment → Transaction created
-6. Admin verifies → Lead status updated
-7. User receives confirmation email
-```
-
-### Admin Flow
-
-```
-1. Admin logs in at /admin/login
-2. Views dashboard with leads & transactions
-3. Filters/searches leads
-4. Opens lead details modal
-5. Verifies pending transactions
-6. Updates lead status
-7. Manages settings (contact info, UPI, services)
-```
-
----
-
-## 🤝 Contributing
-
-We welcome contributions! Please follow these steps:
-
-1. **Fork** the repository
-2. **Create** a feature branch: `git checkout -b feature/amazing-feature`
-3. **Commit** changes: `git commit -m 'feat: add amazing feature'`
-4. **Push** to branch: `git push origin feature/amazing-feature`
-5. **Open** a Pull Request
-
-### Code Style Guidelines
-
-- Follow existing code patterns
-- Use TypeScript strict mode
-- Write meaningful commit messages (Conventional Commits)
-- Add tests for new features
-- Maintain test coverage > 70%
-
----
-
-## 📝 License
-
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 👨‍💻 Authors
-
-<p align="center">
-  <strong>Yash Garg</strong> • <strong>Pulkit Aggarwal</strong><br/>
-  <a href="https://github.com/yashcu">@yashcu</a> • <a href="https://github.com/pulkitagg17">@pulkitagg17</a>
-</p>
-
----
-
-## 📞 Support
-
-- 📧 Email: support@sopwriter.com
-- 🐛 Issues: [GitHub Issues](https://github.com/yashcu/SOPWriter/issues)
-
----
-
-## 🗺️ Roadmap
-
-- [x] Core lead management system
-- [x] Payment integration with UPI
-- [x] Admin dashboard
-- [x] Email notifications
-- [x] Comprehensive test suite
-- [ ] Multi-language support
-- [ ] PDF export for SOPs
-- [ ] Real-time notifications
-- [ ] Analytics dashboard
-- [ ] Mobile app (React Native)
-
----
-
-<p align="center">
-  <strong>Made with ❤️ by the SOP Writer Team</strong><br/>
-  <sub>Last Updated: December 2025</sub>
-</p>
+**Yash Garg** and **Pulkit Aggarwal**
+GitHub: [@yashcu](https://github.com/yashcu) • [@pulkitagg17](https://github.com/pulkitagg17)
